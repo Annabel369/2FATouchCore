@@ -1,0 +1,39 @@
+{
+  "name": "2FATouchCore",
+  "version": "1.0.0",
+  "description": "Biblioteca Core do 2FATouch para ESP32 CYD contendo motor de QR Code, animacoes do Creeper, exibicao climatica, TOTP, teclado touch e funcoes do sistema.",
+  "keywords": [
+    "2fa",
+    "totp",
+    "creeper",
+    "cyd",
+    "esp32",
+    "touch",
+    "qrcode",
+    "tft_espi"
+  ],
+  "authors": [
+    {
+      "name": "Amauri Bueno dos Santos",
+      "email": "amauri00007@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Annabel369/2FATouch.git"
+  },
+  "dependencies": {
+    "ESP32FtpServer": "*",
+    "bodmer/TFT_eSPI": "*",
+    "paulstoffregen/XPT2046_Touchscreen": "*",
+    "bblanchon/ArduinoJson": "*",
+    "bodmer/TJpg_Decoder": "*",
+    "madhephaestus/ESP32Servo": "*",
+    "tarakesh/NTPClient": "*"
+  },
+  "license": "MIT",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "examples": "examples/*/*.ino"
+}
