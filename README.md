@@ -1,13 +1,13 @@
 # 2FATouchCore
 
-Biblioteca Core para o dispositivo **2FATouch (Creeper Auth)** rodando em ESP32 CYD (Cheap Yellow Display).
+Core library for the **2FATouch (Creeper Auth)** device running on ESP32 CYD (Cheap Yellow Display).
 
-## Componentes Inclusos
-- `2FATouchCore.h`: Cabeçalho principal da biblioteca
-- `qrcode.h` e `qrcode.c`: Motor de geração de QR Code de alta performance
-- `allfuc.h`: 65 funções completas do sistema (telas, clima, TOTP, touch, web server, etc.)
+## Included Components
+- `2FATouchCore.h`: Main library header
+- `qrcode.h` and `qrcode.c`: High-performance QR Code generation engine
+- `allfuc.h`: 65 complete system functions (screens, weather, TOTP, touch, web server, etc.)
 
-## Como Usar no seu Sketch
+## How to Use in Your Sketch
 ```cpp
 #include <Arduino.h>
 #include <WiFi.h>
