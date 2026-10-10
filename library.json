@@ -1,7 +1,7 @@
 {
   "name": "2FATouchCore",
-  "version": "1.0.0",
-  "description": "Biblioteca Core do 2FATouch para ESP32 CYD contendo motor de QR Code, animacoes do Creeper, exibicao climatica, TOTP, teclado touch e funcoes do sistema.",
+  "version": "1.1.0",
+  "description": "Full TOTP/2FA authenticator core library for ESP32 CYD (Cheap Yellow Display). Bilingual (English / Portuguese) UI for TFT + captive web, Wi-Fi scan + touch keyboard, weather widget, QR code generator, SD card file manager with streamed i18n-enabled static HTML pages (list / view / edit / upload), vault mode, YubiKey emulation and Creeper animations.",
   "keywords": [
     "2fa",
     "totp",
@@ -10,7 +10,14 @@
     "esp32",
     "touch",
     "qrcode",
-    "tft_espi"
+    "tft_espi",
+    "i18n",
+    "multilingual",
+    "sd-card",
+    "web-ui",
+    "authenticator",
+    "weather",
+    "rfc6238"
   ],
   "authors": [
     {

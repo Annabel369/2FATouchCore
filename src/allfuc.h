@@ -1,5 +1,13 @@
 #pragma once
 #include <Arduino.h>
+#include "lang.h"
+
+// === ADICIONE OS PROTÓTIPOS ABAIXO PARA O ALLFUC.H ENXERGÁ-LAS ===
+void salvarConfig();
+void desligarTela();
+void drawCustomCreeper(int x, int y, int size); // Ajuste os parâmetros se forem diferentes na sua função original
+// ===============================================================
+
 #include "qrcode.h"
 
 #ifndef ALLCONFIGS_H
@@ -25,6 +33,7 @@ void handleListHTML();
 void handleListHTML2();
 void handleLogout();
 void handleListJSON();
+void handleI18nJS();
 void drawLoadingCreeper(int cx, int cy, int cSize);
 void drawLoadingScreen(int percent);
 void carregarTelaMeteorologia();
@@ -65,17 +74,7 @@ void drawWeatherScreen(unsigned long epoch);
 void drawWiFiScreen();
 void drawPixScreen();
 void drawWiserScreen();
-void salvarConfig();
-void carregarTudo();
-void drawSpiderJockey(int x, int y, int tam);
-int base32CharToVal(char c);
-int base32Decode(const String &input, uint8_t *output, int maxOut);
-String calcTOTP(const String &secret, unsigned long epoch);
-void drawCreeper();
-void drawCustomCreeper(int x, int y, int tam);
-void drawInfo(unsigned long epoch);
-void desligarTela();
-void ligarTela();
+
 
 // ====================================================================
 // IMPLEMENTAÇÃO DAS FUNÇÕES
@@ -83,31 +82,28 @@ void ligarTela();
 
 String classificarVento(float kmh) {
   if (kmh < 5)
-    return "Brisa Calma";
+    return tr("Brisa Calma", "Calm Breeze");
   if (kmh < 20)
-    return "Brisa Leve";
+    return tr("Brisa Leve", "Light Breeze");
   if (kmh < 40)
-    return "Vento Moderado";
+    return tr("Vento Moderado", "Moderate Wind");
   if (kmh < 60)
-    return "Vento Forte";
+    return tr("Vento Forte", "Strong Wind");
   if (kmh < 90)
-    return "VENDAVAL";
+    return tr("VENDAVAL", "GALE");
   if (kmh < 117)
-    return "TEMPESTADE";
-  return "FURACAO/TORNADO";
+    return tr("TEMPESTADE", "STORM");
+  return tr("FURACAO/TORNADO", "HURRICANE/TORNADO");
 }
 String getFooter() {
-  // Busca a hora atualizada do servidor NTP agora
   time_t epochTime = timeClient.getEpochTime();
   struct tm *ptm = gmtime((time_t *)&epochTime);
   int ano = ptm->tm_year + 1900;
-  // Se o NTP ainda não sincronizou, ele vai marcar 1970.
-  // Podemos forçar a exibição de 2026 enquanto não sincroniza:
   if (ano < 2025)
     ano = 2026;
   return "<footer>'Copyright' 2025-" + String(ano) +
-         " Criado por Amauri Bueno dos Santos com apoio da Gemini. "
-         "https://github.com/Annabel369/2FATouch</footer>";
+         " " + tr("Criado por Amauri Bueno dos Santos com apoio da Gemini.", "Created by Amauri Bueno dos Santos with support from Gemini.") +
+         " https://github.com/Annabel369/2FATouch</footer>";
 }
 
 void updateWeather(); // Declaração antecipada
@@ -153,6 +149,105 @@ void handleUpload() {
       Serial.printf("Upload concluído! Tamanho: %u bytes\n", upload.totalSize);
     }
   }
+}
+void handleI18nJS() {
+  const char *lang = (GlobalLanguage == LANG_EN_US) ? "en" : "pt";
+  String js = "window.ESP32_I18N='";
+  js += lang;
+  js += "';window.ESP32_TR={";
+  // --- login.html ---
+  js += "'login.title':['Acesso Restrito - Creeper Security','Restricted Access - Creeper Security'],";
+  js += "'login.subtitle':['Autenticação do Gerenciador ESP32','ESP32 Manager Authentication'],";
+  js += "'login.user':['USUÁRIO','USER'],";
+  js += "'login.userph':['admin','admin'],";
+  js += "'login.pass':['SENHA','PASSWORD'],";
+  js += "'login.btn':['💥 Entrar no Sistema','💥 Enter System'],";
+  js += "'login.err':['❌ Usuário ou Senha incorretos!','❌ Invalid Username or Password!'],";
+  js += "'login.conn':['Erro na conexão com ESP32','ESP32 connection error'],";
+  // --- list.html ---
+  js += "'list.title':['Gerenciador de Arquivos - ESP32','File Manager - ESP32'],";
+  js += "'list.header':['📂 Gerenciador de Arquivos do SD','📂 SD File Manager'],";
+  js += "'list.home':['🏠 Inicio','🏠 Home'],";
+  js += "'list.new':['📝 Novo TXT','📝 New TXT'],";
+  js += "'list.refresh':['🔄 Atualizar','🔄 Refresh'],";
+  js += "'list.logout':['🚪 Sair','🚪 Logout'],";
+  js += "'list.dir':['Diretório: ','Directory: '],";
+  js += "'list.type':['Tipo','Type'],";
+  js += "'list.name':['Caminho / Nome','Path / Name'],";
+  js += "'list.size':['Tamanho','Size'],";
+  js += "'list.act':['Ações','Actions'],";
+  js += "'list.init':['Iniciando leitura...','Starting read...'],";
+  js += "'list.readsd':['Lendo SD...','Reading SD...'],";
+  js += "'list.wait':['AGUARDE...','PLEASE WAIT...'],";
+  js += "'list.readdir':['Lendo Diretório...','Reading Directory...'],";
+  js += "'list.errread':['Erro ao ler SD','SD read error'],";
+  js += "'list.back':['⬅️ <b>[ VOLTAR PARA A PASTA ANTERIOR ]</b>','⬅️ <b>[ BACK TO PREVIOUS FOLDER ]</b>'],";
+  js += "'list.empty':['Pasta vazia.','Empty folder.'],";
+  js += "'list.folder':['📁 <b>[PASTA]</b>','📁 <b>[FOLDER]</b>'],";
+  js += "'list.hidden':['👻 <i>[OCULTO]</i>','👻 <i>[HIDDEN]</i>'],";
+  js += "'list.file':['📄 ARQUIVO','📄 FILE'],";
+  js += "'list.oculto':['(oculto)','(hidden)'],";
+  js += "'list.dblclick':['(Duplo clique para abrir)','(Double click to open)'],";
+  js += "'list.down':['⬇️ Baixar','⬇️ Download'],";
+  js += "'list.edit':['✏️ Editar','✏️ Edit'],";
+  js += "'list.del':['❌ Excluir','❌ Delete'],";
+  js += "'list.cdel':['Excluir arquivo?','Delete file?'],";
+  js += "'list.loadfail':['❌ Falha ao carregar lista do SD: ','❌ Failed to load SD list: '],";
+  js += "'list.prompt':['Digite o nome do novo arquivo (ex: notas.txt):','Enter new file name (ex: notes.txt):'],";
+  // --- v.html ---
+  js += "'v.title':['Reprodutor de Mídia ESP32','ESP32 Media Player'],";
+  js += "'v.header':['Reprodutor de Mídia SD','SD Media Player'],";
+  js += "'v.back':['⬅ Voltar (Home)','⬅ Back (Home)'],";
+  js += "'v.logout':['🚪 Sair','🚪 Logout'],";
+  js += "'v.upload':['➕ Enviar Arquivo para SD','➕ Upload File to SD'],";
+  js += "'v.files':['Arquivos no Cartão SD','Files on SD Card'],";
+  js += "'v.load':['Carregando mídias...','Loading media...'],";
+  js += "'v.loading':['Loading...','Loading...'],";
+  js += "'v.pwait':['PLEASE WAIT...','PLEASE WAIT...'],";
+  js += "'v.notag':['Seu navegador não suporta a tag de vídeo.','Your browser does not support the video tag.'],";
+  js += "'v.novideo':['Nenhum vídeo selecionado','No video selected'],";
+  js += "'v.full':['Alternar Tela Cheia','Toggle Fullscreen'],";
+  js += "'v.backhome':['Voltando à Home...','Returning to Home...'],";
+  js += "'v.lgconfirm':['Deseja realmente encerrar a sessão?','Do you really want to end the session?'],";
+  js += "'v.lgdoing':['Encerrando sessão...','Ending session...'],";
+  js += "'v.loadm':['Carregando Mídias...','Loading Media...'],";
+  js += "'v.nomedia':['Nenhum arquivo de mídia encontrado no SD.','No media files found on SD.'],";
+  js += "'v.timeout':['Tempo limite excedido ao conectar ao SD.','Timeout connecting to SD.'],";
+  js += "'v.errsd':['Erro ao ler o cartão SD.','Error reading SD card.'],";
+  js += "'v.open':['Abrindo vídeo...','Opening video...'],";
+  js += "'v.buffer':['Carregando Buffer...','Loading Buffer...'],";
+  js += "'v.playuser':['Aguardando interação do usuário para reproduzir:','Waiting for user interaction to play:'],";
+  js += "'v.errplay':['Erro ao reproduzir o arquivo. Formato não suportado ou erro de leitura do SD.','Error playing file. Unsupported format or SD read error.'],";
+  js += "'v.sending':['Enviando...','Sending...'],";
+  js += "'v.upok':['Upload concluído com sucesso!','Upload completed successfully!'],";
+  js += "'v.uperr':['Erro no servidor: Status ','Server error: Status '],";
+  js += "'v.uperrconn':['Erro de conexão ao enviar arquivo para o ESP32.','Connection error uploading file to ESP32.'],";
+  // --- edit.html ---
+  js += "'edit.title':['Editar Arquivo - ESP32','Edit File - ESP32'],";
+  js += "'edit.editing':['Editando: ','Editing: '],";
+  js += "'edit.nofile':['...','...'],";
+  js += "'edit.noinput':['Nenhum arquivo especificado na URL.','No file specified in URL.'],";
+  js += "'edit.loaderr':['Não foi possível ler o arquivo ','Could not read file '],";
+  js += "'edit.place':['Carregando conteúdo do arquivo...','Loading file content...'],";
+  js += "'edit.errload':['Erro ao carregar: ','Error loading: '],";
+  js += "'edit.save':['💾 Salvar Alterações','💾 Save Changes'],";
+  js += "'edit.cancel':['⬅️ Voltar / Cancelar','⬅️ Back / Cancel'],";
+  js += "'edit.saving':['Salvando...','Saving...'],";
+  js += "'edit.saved':['✅ Arquivo salvo com sucesso!','✅ File saved successfully!'],";
+  js += "'edit.savefail':['Falha no servidor ao salvar.','Server save failure.'],";
+  js += "'edit.saverr':['❌ Erro ao salvar: ','❌ Save error: '],";
+  js += "'edit.errcustom':['Erro: Nenhum arquivo especificado na URL.','Error: No file specified in URL.']";
+  js += "};";
+  js += "document.addEventListener('DOMContentLoaded',function(){";
+  js += "var t=window.ESP32_TR,l=window.ESP32_I18N,i=l==='en'?1:0;";
+  js += "function tr(k){return t[k]?t[k][i]:k;}";
+  js += "document.querySelectorAll('[data-i18n]').forEach(function(e){var k=e.getAttribute('data-i18n');e.innerHTML=tr(k);});";
+  js += "document.querySelectorAll('[data-i18n-attr]').forEach(function(e){";
+  js += "var p=e.getAttribute('data-i18n-attr').split(';');p.forEach(function(s){";
+  js += "var kv=s.split(':');e.setAttribute(kv[0],tr(kv[1]));});});";
+  js += "if(window.applyCustomI18N){window.applyCustomI18N(tr,l);}";
+  js += "});";
+  server.send(200, "application/javascript", js);
 }
 void handleLoginRoute() {
   if (SD.exists("/login.html")) {
@@ -353,11 +448,9 @@ void drawLoadingCreeper(int cx, int cy, int cSize) {
 }
 void drawLoadingScreen(int percent) {
   tft.fillScreen(TFT_BLACK);
-  // 1. Creeper Logo (Tamanho 64x64 centralizado horizontalmente)
   drawLoadingCreeper((tft.width() - 64) / 2, 20, 64);
-  // 2. Texto "Loading... 80%"
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawCentreString("Loading... " + String(percent) + "%", tft.width() / 2,
+  tft.drawCentreString(tr("Carregando... ", "Loading... ") + String(percent) + "%", tft.width() / 2,
                        100, 4);
   // 3. Barra de carregamento identica a escala/design
   // Borda arredondada branca
@@ -370,9 +463,8 @@ void drawLoadingScreen(int percent) {
       tft.fillRect(22 + i * 20, 151, 16, 28, TFT_GREEN);
     }
   }
-  // 4. Texto "Por favor aguarde..."
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawCentreString("Por favor aguarde...", tft.width() / 2, 205, 4);
+  tft.drawCentreString(tr("Por favor aguarde...", "Please wait..."), tft.width() / 2, 205, 4);
 }
 void carregarTelaMeteorologia() {
   for (int pct = 0; pct <= 80; pct += 10) {
@@ -412,8 +504,8 @@ void iniciarScanWiFiTFT() {
   tft.fillScreen(TFT_BLACK);
   tft.drawRect(0, 0, 240, 320, TFT_GREEN);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.drawCentreString("PROCURANDO REDES...", 120, 130, 2);
-  tft.drawCentreString("Aguarde o Scan Wi-Fi", 120, 160, 2);
+  tft.drawCentreString(tr("PROCURANDO REDES...", "SCANNING NETWORKS..."), 120, 130, 2);
+  tft.drawCentreString(tr("Aguarde o Scan Wi-Fi", "Wait for Wi-Fi Scan"), 120, 160, 2);
   
   scannedSSIDs.clear();
   scannedRSSI.clear();
@@ -456,37 +548,34 @@ void drawWiFiScanScreen() {
   tft.drawRect(0, 0, 240, 320, TFT_GREEN);
   tft.drawRect(1, 1, 238, 318, TFT_GREEN);
   tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  tft.drawCentreString("SELECAO DE WI-FI", 120, 8, 4);
+  tft.drawCentreString(tr("SELECAO DE WI-FI", "WI-FI SELECTION"), 120, 8, 4);
 
-  // --- TRAVA DE SEGURANÇA: SE JÁ ESTIVER CONECTADO COM IP VÁLIDO ---
   if (WiFi.status() == WL_CONNECTED && WiFi.localIP() != IPAddress(0,0,0,0)) {
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    tft.drawCentreString("REDE JA CONECTADA!", 120, 70, 2);
+    tft.drawCentreString(tr("REDE JA CONECTADA!", "NETWORK ALREADY CONNECTED!"), 120, 70, 2);
 
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawCentreString("SSID ATUAL:", 120, 110, 2);
+    tft.drawCentreString(tr("SSID ATUAL:", "CURRENT SSID:"), 120, 110, 2);
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.drawCentreString(WiFi.SSID(), 120, 130, 2);
 
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawCentreString("ENDERECO IP:", 120, 170, 2);
+    tft.drawCentreString(tr("ENDERECO IP:", "IP ADDRESS:"), 120, 170, 2);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.drawCentreString(WiFi.localIP().toString(), 120, 195, 2);
 
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    tft.drawCentreString("Sinal: " + String(WiFi.RSSI()) + " dBm", 120, 230, 2);
+    tft.drawCentreString(tr("Sinal: ", "Signal: ") + String(WiFi.RSSI()) + " dBm", 120, 230, 2);
 
-    // Botão Único para Sair sem Perder a Conexão
     tft.drawRoundRect(20, 268, 200, 42, 5, TFT_RED);
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.drawCentreString("VOLTAR AO MENU", 120, 282, 2);
-    return; // Encerra a função para NÃO realizar o scan de redes
+    tft.drawCentreString(tr("VOLTAR AO MENU", "BACK TO MENU"), 120, 282, 2);
+    return;
   }
 
-  // --- SE NÃO ESTIVER CONECTADO, SEGUE A TELA NORMAL COM O SCAN ---
   if (scannedSSIDs.empty()) {
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.drawCentreString("Nenhuma rede encontrada", 120, 120, 2);
+    tft.drawCentreString(tr("Nenhuma rede encontrada", "No networks found"), 120, 120, 2);
   } else {
     int totalPages = (scannedSSIDs.size() + 3) / 4;
     if (wifiScanPage >= totalPages)
@@ -509,27 +598,26 @@ void drawWiFiScanScreen() {
       tft.setTextColor(signalCor, TFT_BLACK);
       tft.drawString(String(rssi) + "dBm", 20, boxY + 26, 1);
       tft.setTextColor(TFT_CYAN, TFT_BLACK);
-      tft.drawString("[ TOQUE ]", 145, boxY + 15, 2);
+      tft.drawString(tr("[ TOQUE ]", "[ TAP ]"), 145, boxY + 15, 2);
     }
 
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft.drawCentreString("Pagina " + String(wifiScanPage + 1) + "/" +
+    tft.drawCentreString(tr("Pagina ", "Page ") + String(wifiScanPage + 1) + "/" +
                              String(totalPages),
                          120, 252, 1);
   }
 
-  // Botões Rodapé Padrão: [VOLTAR] [SCAN] [PAG >]
   tft.drawRoundRect(10, 268, 70, 42, 5, TFT_RED);
   tft.setTextColor(TFT_RED, TFT_BLACK);
-  tft.drawCentreString("RESET", 45, 282, 2);
+  tft.drawCentreString(tr("RESET", "RESET"), 45, 282, 2);
 
   tft.drawRoundRect(85, 268, 70, 42, 5, TFT_CYAN);
   tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  tft.drawCentreString("EXIT", 120, 282, 2);
+  tft.drawCentreString(tr("EXIT", "EXIT"), 120, 282, 2);
 
   tft.drawRoundRect(160, 268, 70, 42, 5, TFT_MAGENTA);
   tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
-  tft.drawCentreString("NEX >", 195, 282, 2);
+  tft.drawCentreString(tr("NEX >", "NEXT >"), 195, 282, 2);
 }
 
 
@@ -600,14 +688,13 @@ void drawWiFiKeyboardScreen() {
   tft.drawString("DEL", 72, 227, 2);
   tft.drawRoundRect(118, 218, 56, 34, 3, TFT_MAGENTA);
   tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
-  tft.drawString("SAIR", 126, 227, 2);
+  tft.drawString(tr("SAIR", "EXIT"), 126, 227, 2);
   tft.drawRoundRect(178, 218, 56, 34, 3, TFT_WHITE);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawString("ESP", 188, 227, 2);
-  // Linha 5: Botão Grande Salvar e Conectar
+  tft.drawString(tr("ESP", "SPC"), 188, 227, 2);
   tft.fillRoundRect(8, 258, 224, 46, 6, TFT_GREEN);
   tft.setTextColor(TFT_BLACK, TFT_GREEN);
-  tft.drawCentreString("CONECTAR & SALVAR", 120, 272, 2);
+  tft.drawCentreString(tr("CONECTAR & SALVAR", "CONNECT & SAVE"), 120, 272, 2);
 }
 void atualizarCaixaSenhaTFT() {
   tft.fillRect(9, 27, 222, 32, TFT_BLACK);
@@ -798,10 +885,10 @@ void handleWiFiTouch(int tx, int ty) {
       tft.fillScreen(TFT_BLACK);
       tft.drawRect(0, 0, 240, 320, TFT_GREEN);
       tft.setTextColor(TFT_GREEN, TFT_BLACK);
-      tft.drawCentreString("REDE SALVA!", 120, 100, 4);
+      tft.drawCentreString(tr("REDE SALVA!", "NETWORK SAVED!"), 120, 100, 4);
       tft.setTextColor(TFT_WHITE, TFT_BLACK);
       tft.drawCentreString("SSID: " + cfgSSID, 120, 150, 2);
-      tft.drawCentreString("REINICIANDO...", 120, 200, 4);
+      tft.drawCentreString(tr("REINICIANDO...", "RESTARTING..."), 120, 200, 4);
       delay(2500);
       ESP.restart();
     }
@@ -1178,31 +1265,31 @@ void drawPCPerformance() {
 String get_weather_description(int code) {
   switch (code) {
   case 0:
-    return "Ceu Limpo";
+    return tr("Ceu Limpo", "Clear Sky");
   case 1:
   case 2:
   case 3:
-    return "Nuvens Esparsas";
+    return tr("Nuvens Esparsas", "Partly Cloudy");
   case 45:
   case 48:
-    return "Nevoeiro";
+    return tr("Nevoeiro", "Fog");
   case 51:
   case 53:
   case 55:
   case 61:
   case 63:
   case 65:
-    return "Chuva leve";
+    return tr("Chuva leve", "Light Rain");
   case 80:
   case 81:
   case 82:
-    return "Chuva forte";
+    return tr("Chuva forte", "Heavy Rain");
   case 95:
   case 96:
   case 99:
-    return "Tempestade";
+    return tr("Tempestade", "Thunderstorm");
   default:
-    return "Nublado";
+    return tr("Nublado", "Cloudy");
   }
 }
 void updateWeather() {
@@ -1360,13 +1447,13 @@ void drawIconTornado(int x, int y) {
 String obterEstacao(int mes, int dia) {
   int d = mes * 100 + dia;
   if (d >= 1221 || d < 320) {
-    return "Verao";
+    return tr("Verao", "Summer");
   } else if (d >= 320 && d < 620) {
-    return "Outono";
+    return tr("Outono", "Autumn");
   } else if (d >= 620 && d < 922) {
-    return "Inverno";
+    return tr("Inverno", "Winter");
   } else {
-    return "Primavera";
+    return tr("Primavera", "Spring");
   }
 }
 String obterFaseLua(unsigned long epoch, bool &isBloodMoon) {
@@ -1386,16 +1473,16 @@ String obterFaseLua(unsigned long epoch, bool &isBloodMoon) {
   isBloodMoon =
       (fraction >= 0.44 && fraction < 0.56) && (((epoch / 86400) % 20) == 5);
   if (isBloodMoon) {
-    return "Lua de Sangue";
+    return tr("Lua de Sangue", "Blood Moon");
   }
   if (fraction < 0.06 || fraction >= 0.94) {
-    return "Lua Nova";
+    return tr("Lua Nova", "New Moon");
   } else if (fraction >= 0.06 && fraction < 0.44) {
-    return "Lua Crescente";
+    return tr("Lua Crescente", "Waxing Moon");
   } else if (fraction >= 0.44 && fraction < 0.56) {
-    return "Lua Cheia";
+    return tr("Lua Cheia", "Full Moon");
   } else {
-    return "Lua Minguante";
+    return tr("Lua Minguante", "Waning Moon");
   }
 }
 void drawIconMoon(int x, int y, unsigned long epoch) {
@@ -1535,7 +1622,7 @@ void drawWeatherScreen(unsigned long epoch) {
   tft.drawCentreString(weather.main, 120, 165, 4);
   // Velocidade do Vento
   tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  tft.drawCentreString("Velocidade do Vento", 120, 205, 2);
+  tft.drawCentreString(tr("Velocidade do Vento", "Wind Speed"), 120, 205, 2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.drawCentreString(String(weather.windSpeed, 1) + " km/h", 120, 225, 4);
   // Classificacao do Vento (Muda de cor se for perigoso)
@@ -1549,7 +1636,7 @@ void drawWeatherScreen(unsigned long epoch) {
   // Exibe a estação do ano embaixo do vento
   String estacao = obterEstacao(ti->tm_mon + 1, ti->tm_mday);
   tft.setTextColor(tft.color565(180, 80, 255), TFT_BLACK);
-  tft.drawCentreString("Estacao: " + estacao, 120, 290, 2);
+  tft.drawCentreString(tr("Estacao: ", "Season: ") + estacao, 120, 290, 2);
 }
 void drawWiFiScreen() {
   tft.fillScreen(TFT_BLACK); // Fundo preto para destaque
@@ -1597,13 +1684,12 @@ void drawWiFiScreen() {
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   // Usando tft.width()/2 para garantir centralização independente da rotação
   tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  tft.drawCentreString("REDE: " + cfgSSID, tft.width() / 2, 225, 2);
-  tft.setTextColor(TFT_GREEN,
-                   TFT_BLACK); // Mudei para verde para destacar a chave
-  tft.drawCentreString("SENHA: " + cfgPASS, tft.width() / 2, 280, 2);
-  if (!updateDisponivel) {
+  tft.drawCentreString(tr("REDE: ", "NETWORK: ") + cfgSSID, tft.width() / 2, 225, 2);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.drawCentreString(tr("SENHA: ", "PASS: ") + cfgPASS, tft.width() / 2, 280, 2);
+  if (updateDisponivel) {
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.drawCentreString("UPDATE DISPONIVEL: v" + versaoNova, 120, 297, 2);
+    tft.drawCentreString(tr("UPDATE DISPONIVEL: v", "UPDATE AVAILABLE: v") + versaoNova, 120, 297, 2);
   }
 }
 void drawPixScreen() {
@@ -1643,7 +1729,7 @@ void drawPixScreen() {
   // --- AJUSTE DE TEXTO (Mais para baixo) ---
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   // Subi um pouco o título para não amontoar
-  tft.drawCentreString("PAGAR VIA PIX", tft.width() / 2, 250, 4);
+  tft.drawCentreString(tr("PAGAR VIA PIX", "PAY VIA PIX"), tft.width() / 2, 250, 4);
   // A chave PIX agora fica em 215 (antes era 225/rodape)
   // Isso deixa um respiro de 5-10 pixels da borda física
   int fonteChave = (cfgPIX.length() > 20) ? 1 : 2;
@@ -1694,7 +1780,7 @@ void drawWiserScreen() {
   // --- AJUSTE DE TEXTO (Rodapé) ---
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   // Título atualizado
-  tft.drawCentreString("PAGAR VIA WISE", tft.width() / 2, 250, 4);
+ tft.drawCentreString(tr("PAGAR VIA WISE", "PAY VIA WISE"), tft.width() / 2, 250, 4);
   // A fonte se ajusta conforme o tamanho do link
   int fonteChave = (cfgWiser.length() > 20) ? 1 : 2;
   // Cor do link usa o mesmo verde da marca para consistência
@@ -1898,9 +1984,14 @@ void drawInfo(unsigned long epoch) {
   char f_time[30];
   char f_date[30];
   // 1. Nomes dos dias da semana
-  const char *diasSemana[] = {"Domingo", "Segunda", "Terca", "Quarta",
+  const char *diasSemana_pt[] = {"Domingo", "Segunda", "Terca", "Quarta",
                               "Quinta",  "Sexta",   "Sabado"};
-  String diaHoje = diasSemana[ti->tm_wday];
+  
+  const char *diasSemana_en[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
+                              "Thursday", "Friday", "Saturday"};
+  String diaHoje = (GlobalLanguage == LANG_EN_US)
+                     ? String(diasSemana_en[ti->tm_wday])
+                     : String(diasSemana_pt[ti->tm_wday]);
   // 2. Lógica AM/PM
   int hora = ti->tm_hour;
   String sufixo = (hora >= 12) ? "PM" : "AM";
@@ -1912,7 +2003,7 @@ void drawInfo(unsigned long epoch) {
   // 3. Formata as Strings
   // Data e Dia da Semana: "Sabado - 14/01"
   String diaFormatado = diaHoje;
-  if (ti->tm_wday >= 1 && ti->tm_wday <= 5) {
+  if (GlobalLanguage == LANG_PT_BR && ti->tm_wday >= 1 && ti->tm_wday <= 5) {
     diaFormatado += "-feira";
   }
   // 2. Agora usamos a variável diaFormatado no sprintf
